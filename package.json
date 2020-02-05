@@ -1,0 +1,17 @@
+{
+  "name": "a11y-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axe-core": "^3.4.1",
+    "playwright": "^0.10.0",
+    "sitemapper": "^3.0.5",
+    "xml2js-es6-promise": "^1.1.1"
+  }
+}
