@@ -12,18 +12,63 @@ const args = arg({
 
 const spinner = ora("Fetching sitemap").start();
 
-(async () => {
-  const url = args["--url"];
-  const { sites } = await sitemap.fetch(`${url}/sitemap.xml`);
+const logUrl = url => {
+  console.log(chalk`
+  {magenta.bold ${url}}`);
+};
+
+const logViolation = violation => {
+  console.log(chalk`
+  {red ${violation.impact.toUpperCase()}}
+  {cyan ${violation.id}}: {white ${violation.description}}`);
+  for (const node of violation.nodes) {
+    console.log(chalk`      {white.bold ${node}}`);
+  }
+};
+
+const sortViolationsBySeverity = violations => {
+  const sortedViolations = [...violations];
+  sortedViolations.sort((a, b) => {
+    const impacts = ["SERIOUS", "MODERATE", "MINOR"];
+    const indexOfA = a.impact ? impacts.indexOf(a.impact.toUpperCase()) : 3;
+    const indexOfB = b.impact ? impacts.indexOf(b.impact.toUpperCase()) : 3;
+    return indexOfA > indexOfB ? 1 : -1;
+  });
+  return sortedViolations;
+};
+
+const fetchSitemapUrls = async baseUrl => {
+  const { sites } = await sitemap.fetch(`${baseUrl}/sitemap.xml`);
   const maxSites = Math.min(sites.length, 10);
-  const runOnSites = sites.slice(0, maxSites);
-  const violations = [];
-  for (const site of runOnSites) {
-    spinner.text = `Running accessibility checks on ${site}`;
+  //TODO: sort by sitemap priority
+  //TODO: if no sitemap, return baseUrl
+  return sites.slice(0, maxSites);
+};
+
+const printResults = toalViolationsByPage => {
+  for (const violationByPage of toalViolationsByPage) {
+    if (violationByPage.violations.length > 0) {
+      logUrl(violationByPage.url);
+      const sortedViolations = sortViolationsBySeverity(
+        violationByPage.violations
+      );
+      for (const violation of sortedViolations) {
+        logViolation(violation);
+      }
+    }
+  }
+};
+
+(async () => {
+  const baseUrl = args["--url"];
+  const sitemapUrls = await fetchSitemapUrls(baseUrl);
+  const toalViolationsByPage = [];
+  for (const url of sitemapUrls) {
+    spinner.text = `Running accessibility checks on ${url}`;
     const browser = await chromium.launch();
     const context = await browser.newContext();
     const page = await context.newPage();
-    await page.goto(site);
+    await page.goto(url);
     await page.addScriptTag({
       url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.1/axe.min.js"
     });
@@ -47,22 +92,9 @@ const spinner = ora("Fetching sitemap").start();
         }))
       };
     });
-    violations.push({ url: site, ...axeViolations });
+    toalViolationsByPage.push({ url, ...axeViolations });
     await browser.close();
   }
   spinner.stop();
-  for (const violationSet of violations) {
-    if (violationSet.violations.length > 0) {
-      console.log(chalk`
-{magenta.bold ${violationSet.url}}`);
-      for (const violation of violationSet.violations) {
-        console.log(chalk`
-  {red ${violation.impact.toUpperCase()}}
-  {cyan ${violation.id}}: {white ${violation.description}}`);
-        for (const node of violation.nodes) {
-          console.log(chalk`      {white.bold ${node}}`);
-        }
-      }
-    }
-  }
+  printResults(toalViolationsByPage);
 })();
