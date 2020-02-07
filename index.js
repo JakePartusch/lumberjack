@@ -1,6 +1,6 @@
 const arg = require("arg");
 const ora = require("ora");
-const prettyjson = require("prettyjson");
+const chalk = require("chalk");
 const { chromium } = require("playwright");
 const Sitemapper = require("sitemapper");
 const sitemap = new Sitemapper();
@@ -15,7 +15,7 @@ const spinner = ora("Fetching sitemap").start();
 (async () => {
   const url = args["--url"];
   const { sites } = await sitemap.fetch(`${url}/sitemap.xml`);
-  const maxSites = Math.min(sites.length, 5);
+  const maxSites = Math.min(sites.length, 10);
   const runOnSites = sites.slice(0, maxSites);
   const violations = [];
   for (const site of runOnSites) {
@@ -53,22 +53,16 @@ const spinner = ora("Fetching sitemap").start();
   spinner.stop();
   for (const violationSet of violations) {
     if (violationSet.violations.length > 0) {
-      console.log(
-        prettyjson.render(violationSet.url, {
-          keysColor: "magenta",
-          stringColor: "magenta"
-        })
-      );
+      console.log(chalk`
+{magenta.bold ${violationSet.url}}`);
       for (const violation of violationSet.violations) {
-        console.log(
-          prettyjson.render(violation, {
-            dashColor: "magenta",
-            stringColor: "white",
-            multilineStringColor: "cyan"
-          })
-        );
+        console.log(chalk`
+  {red ${violation.impact.toUpperCase()}}
+  {cyan ${violation.id}}: {white ${violation.description}}`);
+        for (const node of violation.nodes) {
+          console.log(chalk`      {white.bold ${node}}`);
+        }
       }
-      console.log("\n");
     }
   }
 })();
