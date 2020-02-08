@@ -5,6 +5,8 @@ const { chromium } = require("playwright");
 const Sitemapper = require("sitemapper");
 const sitemap = new Sitemapper();
 
+const MAX_SITES = 50;
+
 const args = arg({
   "--help": Boolean,
   "--url": String // --url <string> or --url=<string>
@@ -39,7 +41,7 @@ const sortViolationsBySeverity = violations => {
 
 const fetchSitemapUrls = async baseUrl => {
   const { sites } = await sitemap.fetch(`${baseUrl}/sitemap.xml`);
-  const maxSites = Math.min(sites.length, 10);
+  const maxSites = Math.min(sites.length, MAX_SITES);
   //TODO: sort by sitemap priority
   //TODO: if no sitemap, return baseUrl
   return sites.slice(0, maxSites);
@@ -59,42 +61,65 @@ const printResults = toalViolationsByPage => {
   }
 };
 
-(async () => {
+const runAccessibilityTestsOnUrl = async url => {
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(url);
+  await page.addScriptTag({
+    url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.1/axe.min.js"
+  });
+  const axeViolations = await page.evaluate(async () => {
+    const axeResults = await new Promise((resolve, reject) => {
+      window.axe.run((err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+
+    return {
+      violations: axeResults.violations.map(violation => ({
+        id: violation.id,
+        impact: violation.impact,
+        description: violation.description,
+        nodes: violation.nodes.map(node => node.html)
+      }))
+    };
+  });
+  await browser.close();
+  return { url, ...axeViolations };
+};
+
+function* chunks(arr, n) {
+  for (let i = 0; i < arr.length; i += n) {
+    yield arr.slice(i, i + n);
+  }
+}
+
+const main = async () => {
   const baseUrl = args["--url"];
   const sitemapUrls = await fetchSitemapUrls(baseUrl);
-  const toalViolationsByPage = [];
-  for (const url of sitemapUrls) {
-    spinner.text = `Running accessibility checks on ${url}`;
-    const browser = await chromium.launch();
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto(url);
-    await page.addScriptTag({
-      url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.1/axe.min.js"
-    });
-    const axeViolations = await page.evaluate(async () => {
-      const axeResults = await new Promise((resolve, reject) => {
-        window.axe.run((err, results) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(results);
-          }
-        });
-      });
-
-      return {
-        violations: axeResults.violations.map(violation => ({
-          id: violation.id,
-          impact: violation.impact,
-          description: violation.description,
-          nodes: violation.nodes.map(node => node.html)
-        }))
-      };
-    });
-    toalViolationsByPage.push({ url, ...axeViolations });
-    await browser.close();
+  const chunkedUrls = [...chunks(sitemapUrls, 5)];
+  const totalViolationsByPage = [];
+  for (const urlChunk of chunkedUrls) {
+    spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
+      1} of ${sitemapUrls.length} pages)`;
+    const chunkOfViolationsByPagePromises = [];
+    for (url of urlChunk) {
+      chunkOfViolationsByPagePromises.push(runAccessibilityTestsOnUrl(url));
+    }
+    totalViolationsByPage.push(
+      ...(await Promise.all(chunkOfViolationsByPagePromises))
+    );
   }
   spinner.stop();
-  printResults(toalViolationsByPage);
-})();
+  printResults(totalViolationsByPage);
+};
+
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
