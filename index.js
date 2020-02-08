@@ -60,7 +60,7 @@ const runAllChecks = async (urls, spinner) => {
     spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
       1} of ${urls.length} pages)`;
     const violationPromises = [];
-    for (url of urlChunk) {
+    for (const url of urlChunk) {
       violationPromises.push(runAccessibilityTestsOnUrl(url));
     }
     const resolvedViolationsByPage = await Promise.all(violationPromises);
