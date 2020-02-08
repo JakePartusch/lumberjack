@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Scans your entire website for accessibility issues",
   "main": "index.js",
+  "bin": "./index.js",
   "engines": {
     "node": ">=10.0.0"
   },
