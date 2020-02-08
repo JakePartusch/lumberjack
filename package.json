@@ -1,12 +1,32 @@
 {
-  "name": "a11y-cli",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@jakepartusch/lumberjack",
+  "version": "0.0.1",
+  "description": "Scans your entire website for accessibility issues",
   "main": "index.js",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "author": {
+    "name": "Jake Partusch",
+    "url": "https://github.com/JakePartusch"
+  },
+  "keywords": [
+    "accessibility",
+    "website",
+    "scan",
+    "audit"
+  ],
+  "homepage": "https://github.com/JakePartusch/lumberjack",
+  "bugs": {
+    "url": "https://github.com/JakePartusch/lumberjack/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JakePartusch/lumberjack.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "arg": "^4.1.3",
