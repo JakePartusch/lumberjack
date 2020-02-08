@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+"use strict";
+
 const arg = require("arg");
 const ora = require("ora");
 const { chromium } = require("playwright");
