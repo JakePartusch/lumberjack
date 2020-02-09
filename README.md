@@ -13,14 +13,40 @@
 
 # About
 
-Lumberjack runs [aXe](https://www.deque.com/axe/) accessibility checks on your entire website!
+Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your entire website!
 
-- Lumberjack reads your website's sitemap
-- It spawns multiple Chromium instances and gets to scanning
-- Finally, the results are aggregated and reported back
+- Reads your website's sitemap
+- Spawns multiple browser instances and starts scanning with axe
+- Aggregates results and reports back
 
 # Usage
 
+## CLI
+
+NPX (recommended for a single run)
+
 ```
 npx @jakepartusch/lumberjack --url https://google.com
+```
+
+Global Install (recommended for multiple runs)
+
+```
+npm install -g @jakepartusch/lumberjack
+lumberjack --url https://google.com
+```
+
+## JavaScript (Node.js)
+
+```
+npm install @jakepartusch/lumberjack
+```
+
+```
+const lumberjack = require('@jakepartusch/lumberjack');
+
+const myFunction = async () => {
+  const results = await lumberjack("https://google.com")
+  console.log(results);
+}
 ```

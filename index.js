@@ -1,4 +1,4 @@
-const { chromium } = require("playwright");
+const { firefox, chromium, webkit } = require("playwright");
 const Sitemapper = require("sitemapper");
 const { chunks } = require("./src/util");
 
@@ -15,8 +15,7 @@ const fetchSitemapUrls = async baseUrl => {
   return sites.slice(0, maxSites);
 };
 
-const runAccessibilityTestsOnUrl = async url => {
-  const browser = await chromium.launch();
+const runAccessibilityTestsOnUrl = async (url, browser) => {
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto(url);
@@ -43,23 +42,36 @@ const runAccessibilityTestsOnUrl = async url => {
       }))
     };
   });
-  await browser.close();
   return { url, ...axeViolations };
 };
 
 const runAllChecks = async (urls, spinner) => {
-  const chunkedUrls = [...chunks(urls, 5)];
+  const chunkedUrls = [...chunks(urls, 3)];
   const totalViolationsByPage = [];
   for (const urlChunk of chunkedUrls) {
     if (spinner) {
       spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
         1} of ${urls.length} pages)`;
     }
+    const browserPromises = [
+      chromium.launch(),
+      firefox.launch(),
+      webkit.launch()
+    ];
+    const browsers = await Promise.all(browserPromises);
     const violationPromises = [];
-    for (const url of urlChunk) {
-      violationPromises.push(runAccessibilityTestsOnUrl(url));
+    for (let i = 0; i < urlChunk.length; i++) {
+      const url = urlChunk[i];
+      const browser = browsers[i];
+      violationPromises.push(runAccessibilityTestsOnUrl(url, browser));
     }
     const resolvedViolationsByPage = await Promise.all(violationPromises);
+
+    const closedBrowserPromises = [];
+    for (const browser of browsers) {
+      closedBrowserPromises.push(browser.close());
+    }
+    await Promise.all(closedBrowserPromises);
     totalViolationsByPage.push(...resolvedViolationsByPage);
   }
   return totalViolationsByPage;
@@ -67,7 +79,8 @@ const runAllChecks = async (urls, spinner) => {
 
 const lumberjack = async (baseUrl, spinner) => {
   const sitemapUrls = await fetchSitemapUrls(baseUrl);
-  return runAllChecks(sitemapUrls, spinner);
+  const results = runAllChecks(sitemapUrls, spinner);
+  return results;
 };
 
 module.exports = lumberjack;
