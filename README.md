@@ -12,16 +12,13 @@
 
 # About
 
-<p align="center">
-  <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" width="768px"/>
-</p>
-
 Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your entire website!
 
 - Reads your website's sitemap
 - Spawns multiple browser instances and starts scanning with axe
 - Aggregates results and reports back
 
+  <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" />
 
 # Usage
 
