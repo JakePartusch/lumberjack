@@ -26,7 +26,8 @@
     "url": "https://github.com/JakePartusch/lumberjack.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "audit": "node ./bin/cli.js --url 'https://jake.partus.ch'"
   },
   "license": "ISC",
   "dependencies": {
