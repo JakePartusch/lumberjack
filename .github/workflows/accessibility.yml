@@ -22,4 +22,4 @@ jobs:
           npm ci
       - name: Accessibility Audits
         run: |
-          xvfb-run --auto-servernum ./bin/cli.js --url https://jake.partus.ch
+          xvfb-run --auto-servernum npm run audit
