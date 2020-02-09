@@ -1,19 +1,13 @@
-#!/usr/bin/env node
-"use strict";
-
-const arg = require("arg");
-const ora = require("ora");
 const { chromium } = require("playwright");
 const Sitemapper = require("sitemapper");
-const { printResults } = require("./src/output");
 const { chunks } = require("./src/util");
 
-const MAX_SITES = 100;
+const MAX_PAGES = 100;
 
 const fetchSitemapUrls = async baseUrl => {
   const sitemap = new Sitemapper();
   const { sites } = await sitemap.fetch(`${baseUrl}/sitemap.xml`);
-  const maxSites = Math.min(sites.length, MAX_SITES);
+  const maxSites = Math.min(sites.length, MAX_PAGES);
   //TODO: sort by sitemap priority
   if (maxSites === 0) {
     return [baseUrl];
@@ -57,8 +51,10 @@ const runAllChecks = async (urls, spinner) => {
   const chunkedUrls = [...chunks(urls, 5)];
   const totalViolationsByPage = [];
   for (const urlChunk of chunkedUrls) {
-    spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
-      1} of ${urls.length} pages)`;
+    if (spinner) {
+      spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
+        1} of ${urls.length} pages)`;
+    }
     const violationPromises = [];
     for (const url of urlChunk) {
       violationPromises.push(runAccessibilityTestsOnUrl(url));
@@ -69,20 +65,9 @@ const runAllChecks = async (urls, spinner) => {
   return totalViolationsByPage;
 };
 
-const main = async () => {
-  const args = arg({
-    "--help": Boolean,
-    "--url": String // --url <string> or --url=<string>
-  });
-  const spinner = ora("Fetching sitemap").start();
-  const baseUrl = args["--url"];
+const lumberjack = async (baseUrl, spinner) => {
   const sitemapUrls = await fetchSitemapUrls(baseUrl);
-  const totalViolationsByPage = await runAllChecks(sitemapUrls, spinner);
-  spinner.stop();
-  printResults(totalViolationsByPage);
+  return runAllChecks(sitemapUrls, spinner);
 };
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+module.exports = lumberjack;
