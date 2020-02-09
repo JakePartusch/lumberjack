@@ -21,7 +21,7 @@ Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your e
 # Example
 
 <p align="center">
-  <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" width="600px"/>
+  <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" width="768px"/>
 </p>
 
 # Usage
