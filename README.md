@@ -36,7 +36,7 @@ npm install -g @jakepartusch/lumberjack
 lumberjack --url https://google.com
 ```
 
-## JavaScript (Node.js)
+## JavaScript
 
 ```
 npm install @jakepartusch/lumberjack
