@@ -8,7 +8,6 @@
 
 <p align="center">
   <img src="./undraw_winter_activities_vv0v.png" alt="Woman in winter attire standing with an ax next to a tree" width="400px"/>
-
 </p>
 
 # About
@@ -18,6 +17,12 @@ Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your e
 - Reads your website's sitemap
 - Spawns multiple browser instances and starts scanning with axe
 - Aggregates results and reports back
+
+# Example
+
+<p align="center">
+  <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" width="600px"/>
+</p>
 
 # Usage
 
