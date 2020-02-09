@@ -50,3 +50,41 @@ const myFunction = async () => {
   console.log(results);
 }
 ```
+
+## Continuous Integration
+
+GitHub Actions Example
+(eg. ".github/workflows/accessibility.yml")
+
+```
+name: Accessibility Audits
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install required Linux packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install libgbm-dev
+          sudo apt-get install xvfb
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install npm packages
+        run: |
+          npm ci
+      - name: Build
+        run: |
+          npm run build
+      - name: Accessibility Audits
+        run: |
+          npm install -g @jakepartusch/lumberjack
+          xvfb-run --auto-servernum lumberjack --url https://google.com
+
+```
