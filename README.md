@@ -20,6 +20,7 @@ Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your e
 <p>
   <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" />
 </p>
+
 # Usage
 
 ## CLI
