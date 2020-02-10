@@ -48,7 +48,7 @@ npm install @jakepartusch/lumberjack
 const lumberjack = require('@jakepartusch/lumberjack');
 
 const myFunction = async () => {
-  const results = await lumberjack("https://google.com")
+  const results = await lumberjack("https://google.com");
   console.log(results);
 }
 ```
