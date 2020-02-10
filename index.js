@@ -21,7 +21,7 @@ const runAccessibilityTestsOnUrl = async url => {
   const page = await context.newPage();
   await page.goto(url);
   await page.addScriptTag({
-    url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.1/axe.min.js"
+    url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.2/axe.min.js"
   });
   const axeViolations = await page.evaluate(async () => {
     const axeResults = await new Promise((resolve, reject) => {
@@ -65,9 +65,12 @@ const runAllChecks = async (urls, spinner) => {
   return totalViolationsByPage;
 };
 
-const lumberjack = async (baseUrl, spinner) => {
-  const sitemapUrls = await fetchSitemapUrls(baseUrl);
-  return runAllChecks(sitemapUrls, spinner);
+const lumberjack = async (baseUrl, options, spinner) => {
+  let urls = [baseUrl];
+  if (!options.baseUrlOnly) {
+    urls = await fetchSitemapUrls(baseUrl);
+  }
+  return runAllChecks(urls, spinner);
 };
 
 module.exports = lumberjack;
