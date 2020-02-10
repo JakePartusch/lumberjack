@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="./.github/undraw_winter_activities_vv0v.png" alt="Woman in winter attire standing with an ax next to a tree" width="350px"/>
+  <img src="https://raw.githubusercontent.com/JakePartusch/lumberjack/master/.github/undraw_winter_activities_vv0v.png" alt="Woman in winter attire standing with an ax next to a tree" width="350px"/>
 </p>
 
 # About
@@ -18,7 +18,7 @@ Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your e
 - Spawns multiple browser instances and starts scanning with axe
 - Aggregates results and reports back
   <p>
-    <img src="./.github/cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" />
+    <img src="https://raw.githubusercontent.com/JakePartusch/lumberjack/master/.github/cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" />
   </p>
 
 # Usage
