@@ -38,6 +38,14 @@ npm install -g @jakepartusch/lumberjack
 lumberjack --url https://google.com
 ```
 
+### Options
+
+```
+--url         // Required — The base url to scan. If a sitemap exists, its pages will be scanned as well
+--strict      // Optional (default: false) — Fail the process if any accessibility issues are found
+--baseUrlOnly // Optional (default: false) — Skip the sitemap scan and only run the audit on the base url
+```
+
 ## JavaScript
 
 ```
