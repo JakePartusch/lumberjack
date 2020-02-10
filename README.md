@@ -17,9 +17,9 @@ Lumberjack runs [axe](https://www.deque.com/axe/) accessibility checks on your e
 - Reads your website's sitemap
 - Spawns multiple browser instances and starts scanning with axe
 - Aggregates results and reports back
-
+<p>
   <img src="./cli-screenshot.png" alt="Screenshot of lumberjack in action. Print the individual accessibility issues found in an example" />
-
+</p>
 # Usage
 
 ## CLI
