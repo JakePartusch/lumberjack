@@ -55,10 +55,7 @@ const runAllChecks = async (urls, spinner) => {
       spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
         1} of ${urls.length} pages)`;
     }
-    const violationPromises = [];
-    for (const url of urlChunk) {
-      violationPromises.push(runAccessibilityTestsOnUrl(url));
-    }
+    const violationPromises = urlChunk.map(url => runAccessibilityTestsOnUrl(url));
     const resolvedViolationsByPage = await Promise.all(violationPromises);
     totalViolationsByPage.push(...resolvedViolationsByPage);
   }
@@ -66,10 +63,9 @@ const runAllChecks = async (urls, spinner) => {
 };
 
 const lumberjack = async (baseUrl, options, spinner) => {
-  let urls = [baseUrl];
-  if (!options.baseUrlOnly) {
-    urls = await fetchSitemapUrls(baseUrl);
-  }
+  const urls = options.baseUrlOnly
+    ? [baseUrl]
+    : await fetchSitemapUrls(baseUrl);
   return runAllChecks(urls, spinner);
 };
 
