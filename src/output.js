@@ -27,6 +27,10 @@ const sortViolationsBySeverity = violations => {
 
 const printResults = toalViolationsByPage => {
   for (const violationByPage of toalViolationsByPage) {
+    if (violationByPage.error) {
+      logUrl(violationByPage.url);
+      console.log(chalk`{red ERROR: ${violationByPage.error}}`);
+    }
     if (violationByPage.violations.length > 0) {
       logUrl(violationByPage.url);
       const sortedViolations = sortViolationsBySeverity(
