@@ -12,39 +12,50 @@ const fetchSitemapUrls = async baseUrl => {
   if (maxSites === 0) {
     return [baseUrl];
   }
-  return sites.slice(0, maxSites);
+  const absoluteUrlSites = sites.map(site => {
+    if (site.startsWith("/")) {
+      return `${baseUrl}${site}`;
+    }
+    return site;
+  });
+  return absoluteUrlSites.slice(0, maxSites);
 };
 
 const runAccessibilityTestsOnUrl = async url => {
   const browser = await chromium.launch();
   const context = await browser.newContext();
-  const page = await context.newPage();
-  await page.goto(url);
-  await page.addScriptTag({
-    url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.2/axe.min.js"
-  });
-  const axeViolations = await page.evaluate(async () => {
-    const axeResults = await new Promise((resolve, reject) => {
-      window.axe.run((err, results) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(results);
-        }
-      });
+  try {
+    const page = await context.newPage();
+    await page.goto(url);
+    await page.addScriptTag({
+      url: "https://cdnjs.cloudflare.com/ajax/libs/axe-core/3.4.2/axe.min.js"
     });
+    const axeViolations = await page.evaluate(async () => {
+      const axeResults = await new Promise((resolve, reject) => {
+        window.axe.run((err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        });
+      });
 
-    return {
-      violations: axeResults.violations.map(violation => ({
-        id: violation.id,
-        impact: violation.impact,
-        description: violation.description,
-        nodes: violation.nodes.map(node => node.html)
-      }))
-    };
-  });
-  await browser.close();
-  return { url, ...axeViolations };
+      return {
+        violations: axeResults.violations.map(violation => ({
+          id: violation.id,
+          impact: violation.impact,
+          description: violation.description,
+          nodes: violation.nodes.map(node => node.html)
+        }))
+      };
+    });
+    return { url, ...axeViolations };
+  } catch (e) {
+    return { url, violations: [], error: e.message };
+  } finally {
+    await browser.close();
+  }
 };
 
 const runAllChecks = async (urls, spinner) => {
@@ -55,7 +66,9 @@ const runAllChecks = async (urls, spinner) => {
       spinner.text = `Running accessibility checks... (${totalViolationsByPage.length ||
         1} of ${urls.length} pages)`;
     }
-    const violationPromises = urlChunk.map(url => runAccessibilityTestsOnUrl(url));
+    const violationPromises = urlChunk.map(url =>
+      runAccessibilityTestsOnUrl(url)
+    );
     const resolvedViolationsByPage = await Promise.all(violationPromises);
     totalViolationsByPage.push(...resolvedViolationsByPage);
   }
