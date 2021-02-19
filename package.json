@@ -36,6 +36,6 @@
     "chalk": "^3.0.0",
     "ora": "^4.0.3",
     "playwright": "^0.10.0",
-    "sitemapper": "^3.0.5"
+    "sitemapper": "3.0.5"
   }
 }
